@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Express Simple User Auth</title>
+</head>
+
+<body>
+  <h1>
+    Login!
+  </h1>
+
+  <div>
+    <a href="/">Back to Home</a>
+  </div>
+
+  <div>
+    Need an account? You can <a href="/register">register here</a>
+  </div>
+
+  <form action="/login" method="POST">
+    <div>
+      <label for="username">Username:</label>
+      <input type="text" name="username" placeholder="Enter your Username" />
+    </div>
+
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" name="password" placeholder="Enter your Password" />
+    </div>
+
+    <div>
+      <input type="submit" value="Login" />
+    </div>
+  </form>
+
+</body>
+
+</html>
