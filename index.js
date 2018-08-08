@@ -2,9 +2,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcrypt");
 
 // Set some global constants for the app
 const PORT = process.env.PORT || 8080;
+const SALT_ROUNDS = 10;
 
 // "Database"
 let users = [];
@@ -73,13 +75,18 @@ app.post("/login", (req, res) => {
     const user = fetchUserByUsername(username);
 
     if (user) {
-      if (user.password === password) {
-        res.cookie("user_id", user.id);
-        res.redirect("/");
-      } else {
-        console.log("Passwords do not match");
-        res.redirect("/login");
-      }
+      bcrypt.compare(password, user.password, (err, result) => {
+        if (err) {
+          console.log("There was an error trying to compare passwords", err);
+          res.redirect("/login");
+        } else if (result) {
+          res.cookie("user_id", user.id);
+          res.redirect("/");
+        } else {
+          console.log("passwords do not match");
+          res.redirect("/login");
+        }
+      });
     } else {
       console.log("Invalid username", username);
       res.redirect("/login");
@@ -101,15 +108,21 @@ app.post("/register", (req, res) => {
 
   if (username && password && password_confirm) {
     if (password === password_confirm) {
-      const user = {
-        id: nextUserId++,
-        username,
-        password
-      };
+      bcrypt.hash(password, SALT_ROUNDS, (err, password_hashed) => {
+        if (err) {
+          console.log("There was an error hashing the password", err);
+        } else {
+          const user = {
+            id: nextUserId++,
+            username,
+            password: password_hashed
+          };
 
-      users.push(user);
-      res.cookie("user_id", user.id, { maxAge: 10 * 60 * 1000 });
-      res.redirect("/");
+          users.push(user);
+          res.cookie("user_id", user.id, { maxAge: 10 * 60 * 1000 });
+          res.redirect("/");
+        }
+      });
     } else {
       console.log("Password and Password Confirmation do not match");
       res.redirect("/register");
