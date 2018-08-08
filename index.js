@@ -1,7 +1,7 @@
 // Import dependencies
 const express = require("express");
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const bcrypt = require("bcrypt");
 
 // Set some global constants for the app
@@ -50,7 +50,13 @@ const app = express();
 
 // Setup middleware
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["my-super-secret-key"],
+    maxAge: 10 * 60 * 1000
+  })
+);
 
 // Set view engine
 app.set("view engine", "ejs");
@@ -58,7 +64,7 @@ app.set("view engine", "ejs");
 // App routes
 // GET / - Home route
 app.get("/", (req, res) => {
-  const user = fetchUser(req.cookies.user_id);
+  const user = fetchUser(req.session.user_id);
   res.render("index", { user: user });
 });
 
@@ -80,7 +86,7 @@ app.post("/login", (req, res) => {
           console.log("There was an error trying to compare passwords", err);
           res.redirect("/login");
         } else if (result) {
-          res.cookie("user_id", user.id);
+          req.session.user_id = user.id;
           res.redirect("/");
         } else {
           console.log("passwords do not match");
@@ -119,7 +125,7 @@ app.post("/register", (req, res) => {
           };
 
           users.push(user);
-          res.cookie("user_id", user.id, { maxAge: 10 * 60 * 1000 });
+          req.session.user_id = user.id;
           res.redirect("/");
         }
       });
@@ -136,7 +142,7 @@ app.post("/register", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/");
 });
 
