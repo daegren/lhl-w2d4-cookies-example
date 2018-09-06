@@ -9,12 +9,27 @@
 
 <body>
   <h1>
-    Welcome!
+    Welcome <%= currentUser ? currentUser.username : 'Anon' %>!
   </h1>
 
+  <% if (currentUser) { %>
+    <form action='/logout' method="POST">
+      <button type="submit">Logout</button>
+    </form>
+  <% } else { %>
+    <div>
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    </div>
+  <% } %>
+
   <div>
-    <a href="/login">Login</a>
-    <a href="/register">Register</a>
+    <h2>Users</h2>
+    <ul>
+      <% users.forEach(function(user) { %>
+        <li><%= user.username %> - <%= user.password %></li>
+      <% }) %>
+    </ul>
   </div>
 </body>
 
